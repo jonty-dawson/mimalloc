@@ -28,11 +28,11 @@ terms of the MIT license. A copy of the license can be found in the file
   #define mi_decl_nodiscard    [[nodiscard]]
 #elif (__GNUC__ >= 4) || defined(__clang__)  // includes clang, icc, and clang-cl
   #define mi_decl_nodiscard    __attribute__((warn_unused_result))
-#elif (_MSC_VER >= 1700) 
+#elif (_MSC_VER >= 1700)
   #define mi_decl_nodiscard    _Check_return_
-#else 
-  #define mi_decl_nodiscard 
-#endif 
+#else
+  #define mi_decl_nodiscard
+#endif
 
 #ifdef _MSC_VER
   #if !defined(MI_SHARED_LIB)
@@ -53,8 +53,19 @@ terms of the MIT license. A copy of the license can be found in the file
   #define mi_attr_alloc_size2(s1,s2)
   #define mi_attr_alloc_align(p)
 #elif defined(__GNUC__)                 // includes clang and icc
-  #define mi_cdecl                      // leads to warnings... __attribute__((cdecl))
-  #define mi_decl_export                __attribute__((visibility("default")))
+  #if !defined(__MINGW32__)
+    #define mi_cdecl                      // leads to warnings... __attribute__((cdecl))
+    #define mi_decl_export                __attribute__((visibility("default")))
+  #else
+    #define mi_cdecl                      __cdecl
+    #if !defined(MI_SHARED_LIB)
+      #define mi_decl_export
+    #elif defined(MI_SHARED_LIB_EXPORT)
+      #define mi_decl_export              __declspec(dllexport)
+    #else
+      #define mi_decl_export              __declspec(dllimport)
+    #endif
+  #endif
   #define mi_decl_restrict
   #define mi_attr_malloc                __attribute__((malloc))
   #if (defined(__clang_major__) && (__clang_major__ < 4)) || (__GNUC__ < 5)
